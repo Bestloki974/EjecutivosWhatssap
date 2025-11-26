@@ -1,4 +1,0 @@
-2025/07/02-23:56:36.069 39fc Reusing MANIFEST C:\whatsapp-server\.wwebjs_auth\session-messagehub-principal\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
-2025/07/02-23:56:36.069 39fc Recovering log #235
-2025/07/02-23:56:36.085 39fc Reusing old log C:\whatsapp-server\.wwebjs_auth\session-messagehub-principal\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000235.log 
-2025/07/02-23:56:40.165 39fc Manual compaction at level-0 from '\x003\x00\x00\x00' @ 72057594037927935 : 1 .. '\x004\x00\x00\x00' @ 0 : 0; will stop at (end)

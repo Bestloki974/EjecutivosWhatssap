@@ -4,10 +4,10 @@ const fetch = require('node-fetch');
 // Configuración
 const WEBHOOK_URL = 'http://localhost/sistemasms/backend/api/whatsapp/webhook-responses.php';
 
-// 🆕 FUNCIÓN PARA ENVIAR WEBHOOK
+// [NUEVO] FUNCION PARA ENVIAR WEBHOOK
 async function sendWebhook(data) {
     try {
-        console.log('📡 Enviando webhook:', JSON.stringify(data, null, 2));
+        // console.log('📡 Enviando webhook:', JSON.stringify(data, null, 2)); // Comentado para reducir logs
         
         const response = await fetch(WEBHOOK_URL, {
             method: 'POST',
@@ -19,18 +19,18 @@ async function sendWebhook(data) {
         
         if (response.ok) {
             const responseText = await response.text();
-            console.log('✅ Webhook enviado exitosamente - Respuesta:', responseText);
+            // console.log('✅ Webhook enviado exitosamente - Respuesta:', responseText); // Comentado para reducir logs
         } else {
-            console.log('❌ Error en webhook:', response.status, response.statusText);
+            console.log('[ERROR] Error en webhook:', response.status, response.statusText);
             const errorText = await response.text();
-            console.log('❌ Error details:', errorText);
+            console.log('[ERROR] Error details:', errorText);
         }
     } catch (error) {
-        console.error('❌ Error enviando webhook:', error.message);
+        console.error('[ERROR] Error enviando webhook:', error.message);
     }
 }
 
-// 🆕 FUNCIÓN PARA AGREGAR LISTENERS DE WEBHOOK A UN CLIENTE
+// [NUEVO] FUNCION PARA AGREGAR LISTENERS DE WEBHOOK A UN CLIENTE
 function addWebhookListeners(client, sessionName = 'principal') {
     console.log(`🔗 Agregando webhook listeners a sesión: ${sessionName}`);
     

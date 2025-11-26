@@ -1,8 +1,27 @@
+# Dependencias
 /node_modules
+/package-lock.json
+
+# Archivos de build y compilación
 /build
 /dist
+
+# Archivos de entorno y configuración sensible
 /.env
 /.env.local
 /.env.development.local
 /.env.test.local
 /.env.production.local
+
+# Archivos específicos de whatsapp-web.js
+/.wwebjs_auth
+/.wwebjs_cache
+
+# Archivos de proyecto y logs
+/backup
+messagehub.sql
+npm-debug.log*
+
+# Archivos de OS (Opcional, pero recomendado)
+.DS_Store # Mac
+Thumbs.db # Windows
