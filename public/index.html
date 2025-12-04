@@ -1,0 +1,2231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp CRM - Ejecutivos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #075e54;
+            --primary-dark: #054640;
+            --secondary: #128c7e;
+            --accent: #25d366;
+            --bg-dark: #111b21;
+            --bg-chat: #0b141a;
+            --bg-sidebar: #202c33;
+            --text-primary: #e9edef;
+            --text-secondary: #8696a0;
+            --border-color: #2a3942;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Login */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-chat) 100%);
+        }
+
+        .login-box {
+            background: var(--bg-sidebar);
+            padding: 40px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .login-box h2 {
+            color: var(--accent);
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .form-control {
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 12px 16px;
+            border-radius: 8px;
+        }
+
+        .form-control:focus {
+            background: var(--bg-dark);
+            border-color: var(--accent);
+            color: var(--text-primary);
+            box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.1);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #1ebe5d;
+            transform: translateY(-1px);
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 16px 20px;
+            background: var(--bg-dark);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header h4 {
+            color: var(--accent);
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--secondary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .user-details small {
+            color: var(--text-secondary);
+        }
+
+        .nav-menu {
+            flex: 1;
+            padding: 16px 0;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: rgba(37, 211, 102, 0.1);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: rgba(37, 211, 102, 0.15);
+            color: var(--accent);
+            border-left-color: var(--accent);
+        }
+
+        .nav-item i {
+            font-size: 20px;
+            width: 24px;
+        }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .content-header {
+            padding: 16px 24px;
+            background: var(--bg-sidebar);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .content-header h5 {
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .content-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        /* Cards */
+        .stat-card {
+            background: var(--bg-sidebar);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-card .icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .stat-card .label {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* Tables */
+        .table-dark-custom {
+            background: var(--bg-sidebar);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .table-dark-custom th {
+            background: var(--bg-dark) !important;
+            color: var(--text-secondary) !important;
+            font-weight: 500;
+            border-bottom: 1px solid var(--border-color) !important;
+            padding: 14px 16px;
+        }
+
+        .table-dark-custom td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color) !important;
+            color: #ffffff !important;
+            background: var(--bg-sidebar) !important;
+            vertical-align: middle;
+        }
+
+        .table-dark-custom td strong {
+            color: #25d366 !important;
+        }
+
+        .table-dark-custom tbody tr {
+            background: var(--bg-sidebar) !important;
+        }
+
+        .table-dark-custom tbody tr:nth-child(even) {
+            background: var(--bg-dark) !important;
+        }
+
+        .table-dark-custom tbody tr:hover {
+            background: rgba(37, 211, 102, 0.15) !important;
+        }
+        
+        .table-dark-custom .table {
+            margin-bottom: 0;
+            --bs-table-bg: transparent;
+            --bs-table-striped-bg: transparent;
+            --bs-table-hover-bg: transparent;
+            color: inherit;
+        }
+        
+        .table-dark-custom .table > :not(caption) > * > * {
+            background-color: transparent !important;
+            box-shadow: none !important;
+        }
+
+        /* Badges */
+        .badge-role {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-superadmin { background: #7c3aed; color: white; }
+        .badge-admin { background: #3b82f6; color: white; }
+        .badge-executive { background: var(--accent); color: white; }
+        .badge-active { background: var(--accent); color: white; }
+        .badge-inactive { background: #ef4444; color: white; }
+
+        /* Chat List */
+        .chat-list {
+            background: var(--bg-sidebar);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .chat-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .chat-item:hover {
+            background: rgba(37, 211, 102, 0.1);
+        }
+
+        .chat-item.active {
+            background: rgba(37, 211, 102, 0.15);
+        }
+
+        .chat-avatar {
+            width: 48px;
+            height: 48px;
+            background: var(--secondary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .chat-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .chat-name {
+            font-weight: 500;
+            margin-bottom: 2px;
+            color: #ffffff;
+        }
+
+        .chat-preview {
+            color: var(--text-secondary);
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-time {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .unread-badge {
+            background: var(--accent);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* Chat Window */
+        .chat-window {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background: var(--bg-chat);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            padding: 12px 20px;
+            background: var(--bg-sidebar);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .message {
+            max-width: 65%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .message.received {
+            background: var(--bg-sidebar);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.sent {
+            background: var(--primary);
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        .chat-input-area {
+            padding: 12px 20px;
+            background: var(--bg-sidebar);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 12px;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: var(--bg-dark);
+            border: none;
+            border-radius: 24px;
+            padding: 12px 20px;
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        .send-btn {
+            width: 48px;
+            height: 48px;
+            background: var(--accent);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Session Card */
+        .session-card {
+            background: var(--bg-sidebar);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s;
+        }
+
+        .session-card:hover {
+            border-color: var(--accent);
+        }
+
+        .session-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .status-dot.connected { background: var(--accent); }
+        .status-dot.disconnected { background: #ef4444; }
+        .status-dot.connecting { background: #f59e0b; animation: pulse 1s infinite; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .qr-container {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .qr-container img {
+            max-width: 200px;
+        }
+
+        /* Modal */
+        .modal-content {
+            background: var(--bg-sidebar);
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-close {
+            filter: invert(1);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+            .sidebar-header h4, .user-details, .nav-item span {
+                display: none;
+            }
+            .nav-item {
+                justify-content: center;
+                padding: 16px;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Login View -->
+    <div id="login-view" class="login-container" style="display: none;">
+        <div class="login-box">
+            <h2><i class="bi bi-whatsapp me-2"></i>WhatsApp CRM</h2>
+            <form id="login-form">
+                <div class="mb-3">
+                    <label class="form-label">Usuario</label>
+                    <input type="text" id="login-username" class="form-control" placeholder="Ingresa tu usuario" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Contraseña</label>
+                    <input type="password" id="login-password" class="form-control" placeholder="Ingresa tu contraseña" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar Sesión
+                </button>
+                <div id="login-error" class="alert alert-danger mt-3" style="display:none"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="main-app" class="main-container" style="display:none">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h4><i class="bi bi-whatsapp me-2"></i>CRM</h4>
+                <div class="user-info">
+                    <div class="user-avatar" id="user-avatar">A</div>
+                    <div class="user-details">
+                        <div id="user-name">Usuario</div>
+                        <small id="user-role-display">Rol</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="nav-menu">
+                <div class="nav-item active" data-view="dashboard">
+                    <i class="bi bi-grid-1x2"></i>
+                    <span>Dashboard</span>
+                </div>
+                <div class="nav-item" data-view="chats">
+                    <i class="bi bi-chat-dots"></i>
+                    <span>Conversaciones</span>
+                </div>
+                <div class="nav-item" data-view="sessions" id="nav-sessions">
+                    <i class="bi bi-phone"></i>
+                    <span>Sesiones WA</span>
+                </div>
+                <div class="nav-item" data-view="users" id="nav-users">
+                    <i class="bi bi-people"></i>
+                    <span>Usuarios</span>
+                </div>
+                <div class="nav-item" data-view="companies" id="nav-companies">
+                    <i class="bi bi-building"></i>
+                    <span>Empresas</span>
+                </div>
+            </div>
+
+            <div class="nav-item" onclick="logout()" style="border-top: 1px solid var(--border-color);">
+                <i class="bi bi-box-arrow-left"></i>
+                <span>Cerrar Sesión</span>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content-area">
+            <!-- Dashboard View -->
+            <div id="view-dashboard" class="view-content">
+                <div class="content-header">
+                    <h5><i class="bi bi-grid-1x2 me-2"></i>Dashboard</h5>
+                </div>
+                <div class="content-body">
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="icon" style="background: rgba(37, 211, 102, 0.2); color: var(--accent);">
+                                    <i class="bi bi-phone"></i>
+                                </div>
+                                <div class="number" id="stat-sessions">0</div>
+                                <div class="label">Sesiones Activas</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="icon" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6;">
+                                    <i class="bi bi-chat-dots"></i>
+                                </div>
+                                <div class="number" id="stat-chats">0</div>
+                                <div class="label">Conversaciones</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="icon" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b;">
+                                    <i class="bi bi-envelope"></i>
+                                </div>
+                                <div class="number" id="stat-unread">0</div>
+                                <div class="label">Sin Leer</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="icon" style="background: rgba(124, 58, 237, 0.2); color: #7c3aed;">
+                                    <i class="bi bi-people"></i>
+                                </div>
+                                <div class="number" id="stat-users">0</div>
+                                <div class="label">Usuarios</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <h6 class="mb-3">Conversaciones Recientes</h6>
+                            <div id="recent-chats" class="chat-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chats View -->
+            <div id="view-chats" class="view-content" style="display:none">
+                <div class="content-header">
+                    <h5><i class="bi bi-chat-dots me-2"></i>Conversaciones</h5>
+                    <div class="d-flex gap-2 align-items-center">
+                        <button class="btn btn-success btn-sm" onclick="showNewChatModal()">
+                            <i class="bi bi-plus-lg me-1"></i>Nuevo Chat
+                        </button>
+                        <select id="filter-company-chats" class="form-select" style="width: 180px; background: var(--bg-dark); border-color: var(--border-color); color: var(--text-primary);">
+                            <option value="">Todas las empresas</option>
+                        </select>
+                        <select id="filter-session" class="form-select" style="width: 180px; background: var(--bg-dark); border-color: var(--border-color); color: var(--text-primary);">
+                            <option value="">Todas las sesiones</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="content-body p-0 d-flex" style="height: calc(100vh - 80px);">
+                    <div class="chat-list" style="width: 350px; border-radius: 0; height: 100%; overflow-y: auto;" id="chats-list"></div>
+                    <div class="flex-grow-1 p-3" id="chat-window-container">
+                        <div class="empty-state h-100 d-flex flex-column align-items-center justify-content-center">
+                            <i class="bi bi-chat-square-text"></i>
+                            <h5>Selecciona una conversación</h5>
+                            <p>Elige un chat de la lista para ver los mensajes</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sessions View -->
+            <div id="view-sessions" class="view-content" style="display:none">
+                <div class="content-header">
+                    <h5><i class="bi bi-phone me-2"></i>Sesiones de WhatsApp</h5>
+                    <div class="d-flex gap-2">
+                        <select id="filter-company-sessions" class="form-select" style="width: 180px; background: var(--bg-dark); border-color: var(--border-color); color: var(--text-primary);">
+                            <option value="">Todas las empresas</option>
+                        </select>
+                        <button class="btn btn-primary btn-sm" onclick="showCreateSessionModal()">
+                            <i class="bi bi-plus-lg me-1"></i>Nueva Sesión
+                        </button>
+                    </div>
+                </div>
+                <div class="content-body">
+                    <div class="row g-4" id="sessions-grid"></div>
+                </div>
+            </div>
+
+            <!-- Users View -->
+            <div id="view-users" class="view-content" style="display:none">
+                <div class="content-header">
+                    <h5><i class="bi bi-people me-2"></i>Gestión de Usuarios</h5>
+                    <button class="btn btn-primary btn-sm" onclick="showCreateUserModal()">
+                        <i class="bi bi-plus-lg me-1"></i>Nuevo Usuario
+                    </button>
+                </div>
+                <div class="content-body">
+                    <div class="table-dark-custom">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Usuario</th>
+                                    <th>Nombre Completo</th>
+                                    <th>Rol</th>
+                                    <th>Empresa</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Companies View (Solo SuperAdmin) -->
+            <div id="view-companies" class="view-content" style="display:none">
+                <div class="content-header">
+                    <h5><i class="bi bi-building me-2"></i>Gestión de Empresas</h5>
+                    <button class="btn btn-primary btn-sm" onclick="showCreateCompanyModal()">
+                        <i class="bi bi-plus-lg me-1"></i>Nueva Empresa
+                    </button>
+                </div>
+                <div class="content-body">
+                    <div class="table-dark-custom">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Plan</th>
+                                    <th>Usuarios</th>
+                                    <th>Sesiones</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="companies-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Crear Usuario -->
+    <div class="modal fade" id="userModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nuevo Usuario</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="user-form">
+                        <div class="mb-3">
+                            <label class="form-label">Nombre Completo</label>
+                            <input type="text" id="user-fullname" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Usuario</label>
+                            <input type="text" id="user-username" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Contraseña</label>
+                            <input type="password" id="user-password" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Rol</label>
+                            <select id="user-role" class="form-select">
+                                <option value="executive">Ejecutivo</option>
+                                <option value="admin">Admin de Empresa</option>
+                            </select>
+                        </div>
+                        <div class="mb-3" id="company-select-group">
+                            <label class="form-label">Empresa</label>
+                            <select id="user-company" class="form-select"></select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="createUser()">Crear Usuario</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Nuevo Chat -->
+    <div class="modal fade" id="newChatModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-chat-plus me-2"></i>Nuevo Chat</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Número de teléfono</label>
+                        <div class="input-group">
+                            <span class="input-group-text" style="background: var(--bg-dark); border-color: var(--border-color); color: var(--text-secondary);">+</span>
+                            <input type="text" id="new-chat-phone" class="form-control" placeholder="56912345678" 
+                                   style="background: var(--bg-dark); border-color: var(--border-color); color: var(--text-primary);">
+                        </div>
+                        <small class="text-muted">Ingresa el número con código de país (ej: 56912345678 para Chile)</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Sesión de WhatsApp</label>
+                        <select id="new-chat-session" class="form-select" style="background: var(--bg-dark); border-color: var(--border-color); color: var(--text-primary);">
+                            <option value="">-- Selecciona una sesión --</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mensaje inicial</label>
+                        <textarea id="new-chat-message" class="form-control" rows="3" placeholder="Escribe tu mensaje..."
+                                  style="background: var(--bg-dark); border-color: var(--border-color); color: var(--text-primary);"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" onclick="startNewChat()">
+                        <i class="bi bi-send me-1"></i>Enviar y crear chat
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Asignar Sesión a Ejecutivo -->
+    <div class="modal fade" id="assignSessionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-person-gear me-2"></i>Asignar Sesión</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Sesión: <strong id="assign-session-name"></strong></p>
+                    <input type="hidden" id="assign-session-id">
+                    <div class="mb-3">
+                        <label class="form-label">Selecciona un ejecutivo</label>
+                        <select id="assign-executive" class="form-select">
+                            <option value="">-- Sin asignar --</option>
+                        </select>
+                    </div>
+                    <div class="alert alert-info small">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Al asignar un ejecutivo, solo él podrá ver y gestionar las conversaciones de esta sesión de WhatsApp.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="assignSessionToExecutive()">
+                        <i class="bi bi-check-lg me-1"></i>Guardar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Crear Empresa -->
+    <div class="modal fade" id="companyModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nueva Empresa</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="company-form">
+                        <div class="mb-3">
+                            <label class="form-label">Nombre de la Empresa</label>
+                            <input type="text" id="company-name" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Plan</label>
+                            <select id="company-plan" class="form-select">
+                                <option value="basic">Básico</option>
+                                <option value="pro">Profesional</option>
+                                <option value="enterprise">Empresarial</option>
+                            </select>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Máx. Sesiones</label>
+                                <input type="number" id="company-max-sessions" class="form-control" value="1">
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Máx. Usuarios</label>
+                                <input type="number" id="company-max-users" class="form-control" value="5">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="createCompany()">Crear Empresa</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Crear Sesión -->
+    <div class="modal fade" id="sessionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nueva Sesión de WhatsApp</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="session-form">
+                        <div class="mb-3">
+                            <label class="form-label">Nombre de la Sesión</label>
+                            <input type="text" id="session-name" class="form-control" placeholder="ej: ventas-principal" required>
+                        </div>
+                        <div class="mb-3" id="session-company-group">
+                            <label class="form-label">Empresa</label>
+                            <select id="session-company" class="form-select"></select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="createSession()">Crear Sesión</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Asignar Chat -->
+    <div class="modal fade" id="assignModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Asignar Conversación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Asignar a:</label>
+                        <select id="assign-user" class="form-select">
+                            <option value="">Sin asignar</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="assignChat()">Asignar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <script>
+        // ==========================================
+        // 🔧 CONFIGURACIÓN
+        // ==========================================
+        const API_URL = '/api';
+        let currentUser = null;
+        let currentChat = null;
+        let qrInterval = null;
+        let companiesList = [];
+        let socket = null;
+        const REMEMBER_SESSION = false;
+
+        // ==========================================
+        // 🚀 INICIALIZACIÓN
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!REMEMBER_SESSION) {
+                localStorage.clear();
+                showLoginView();
+                return;
+            }
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            
+            if (token && user) {
+                // Verificar si el token es válido haciendo una petición al servidor
+                try {
+                    const res = await fetch(`${API_URL}/auth/profile`, {
+                        headers: { 'x-access-token': token }
+                    });
+                    const data = await res.json();
+                    
+                    if (data.success) {
+                        currentUser = JSON.parse(user);
+                        initApp();
+                    } else {
+                        // Token inválido, limpiar y mostrar login
+                        localStorage.clear();
+                        showLoginView();
+                    }
+                } catch (err) {
+                    // Error de conexión, mostrar login
+                    localStorage.clear();
+                    showLoginView();
+                }
+            } else {
+                // No hay token, mostrar login
+                showLoginView();
+            }
+        });
+
+        function showLoginView() {
+            document.getElementById('login-view').style.display = 'flex';
+            document.getElementById('main-app').style.display = 'none';
+        }
+
+        // ==========================================
+        // 🔌 WEBSOCKET
+        // ==========================================
+        function initWebSocket() {
+            socket = io();
+            
+            socket.on('connect', () => {
+                console.log('🔌 WebSocket conectado');
+                // Unirse a la sala de la empresa
+                if (currentUser.company_id) {
+                    socket.emit('join_company', currentUser.company_id);
+                }
+                // SuperAdmin se une a todas las empresas
+                if (currentUser.role === 'superadmin') {
+                    socket.emit('join_company', 'all');
+                }
+            });
+
+            // Nuevo mensaje recibido
+            socket.on('new_message', (data) => {
+                console.log('📩 Nuevo mensaje:', data);
+                
+                // Actualizar lista de chats
+                loadChatsQuiet();
+                
+                // Si estamos viendo este chat, actualizar mensajes
+                if (currentChat && currentChat.id === data.chatId) {
+                    appendMessage(data);
+                }
+                
+                // Mostrar notificación si no es nuestro mensaje
+                if (!data.fromMe) {
+                    showNotification(data);
+                }
+            });
+
+            // Mensaje en chat específico
+            socket.on('chat_message', (data) => {
+                if (currentChat && currentChat.id === data.chatId) {
+                    appendMessage(data);
+                }
+            });
+
+            // Sesión conectada
+            socket.on('session_connected', (data) => {
+                console.log('✅ Sesión conectada:', data);
+                if (document.getElementById('view-sessions').style.display !== 'none') {
+                    loadSessions();
+                }
+            });
+
+            // Sesión desconectada
+            socket.on('session_disconnected', (data) => {
+                console.log('❌ Sesión desconectada:', data);
+                if (document.getElementById('view-sessions').style.display !== 'none') {
+                    loadSessions();
+                }
+            });
+
+            socket.on('disconnect', () => {
+                console.log('🔌 WebSocket desconectado');
+            });
+        }
+
+        // Agregar mensaje al chat actual sin recargar todo
+        function appendMessage(data) {
+            const container = document.getElementById('messages-container');
+            if (!container) return;
+
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${data.fromMe ? 'sent' : 'received'}`;
+            msgDiv.innerHTML = `
+                <div>${escapeHtml(data.body)}</div>
+                <div class="message-time">${formatTime(data.timestamp)}</div>
+            `;
+            container.appendChild(msgDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Cargar chats sin mostrar loading
+        async function loadChatsQuiet() {
+            try {
+                const sessionId = document.getElementById('filter-session')?.value || '';
+                const companyId = document.getElementById('filter-company-chats')?.value || '';
+                
+                let url = '/chats';
+                const params = [];
+                if (sessionId) params.push(`session_id=${sessionId}`);
+                if (companyId) params.push(`company_id=${companyId}`);
+                if (params.length > 0) url += '?' + params.join('&');
+
+                const res = await apiRequest(url);
+                if (res.success) {
+                    renderChatsList(res.chats);
+                }
+            } catch (err) {
+                console.error('Error actualizando chats:', err);
+            }
+        }
+
+        // Mostrar notificación
+        function showNotification(data) {
+            // Notificación visual simple
+            const name = data.contactName || formatPhone(data.remoteJid);
+            console.log(`🔔 Nuevo mensaje de ${name}: ${data.body?.substring(0, 50)}`);
+        }
+
+        // ==========================================
+        // 🔐 AUTENTICACIÓN
+        // ==========================================
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                const res = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    currentUser = data.user;
+                    initApp();
+                } else {
+                    showError('login-error', data.error);
+                }
+            } catch (err) {
+                showError('login-error', 'Error de conexión');
+            }
+        });
+
+        function logout() {
+            localStorage.clear();
+            location.reload();
+        }
+
+        // ==========================================
+        // 🎨 INICIALIZAR APP
+        // ==========================================
+        function initApp() {
+            document.getElementById('login-view').style.display = 'none';
+            document.getElementById('main-app').style.display = 'flex';
+
+            // Configurar UI según rol
+            document.getElementById('user-name').textContent = currentUser.full_name;
+            document.getElementById('user-role-display').textContent = getRoleName(currentUser.role);
+            document.getElementById('user-avatar').textContent = currentUser.full_name.charAt(0).toUpperCase();
+
+            // Ocultar/mostrar menús según rol
+            if (currentUser.role !== 'superadmin') {
+                document.getElementById('nav-companies').style.display = 'none';
+            }
+
+            if (currentUser.role === 'executive') {
+                document.getElementById('nav-users').style.display = 'none';
+                document.getElementById('nav-sessions').style.display = 'none';
+            }
+
+            // Configurar navegación
+            document.querySelectorAll('.nav-item[data-view]').forEach(item => {
+                item.addEventListener('click', () => switchView(item.dataset.view));
+            });
+
+            // Inicializar WebSocket para tiempo real
+            initWebSocket();
+
+            // Cargar dashboard
+            switchView('dashboard');
+        }
+
+        function getRoleName(role) {
+            const roles = {
+                'superadmin': 'Super Administrador',
+                'admin': 'Admin de Empresa',
+                'executive': 'Ejecutivo'
+            };
+            return roles[role] || role;
+        }
+
+        // ==========================================
+        // 🔄 NAVEGACIÓN
+        // ==========================================
+        function switchView(view) {
+            // Ocultar todas las vistas
+            document.querySelectorAll('.view-content').forEach(v => v.style.display = 'none');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+            // Mostrar vista seleccionada
+            document.getElementById(`view-${view}`).style.display = 'block';
+            document.querySelector(`.nav-item[data-view="${view}"]`).classList.add('active');
+
+            // Cargar datos
+            switch (view) {
+                case 'dashboard': loadDashboard(); break;
+                case 'chats': loadChats(); break;
+                case 'sessions': loadSessions(); break;
+                case 'users': loadUsers(); break;
+                case 'companies': loadCompanies(); break;
+            }
+        }
+
+        // ==========================================
+        // 📊 DASHBOARD
+        // ==========================================
+        async function loadDashboard() {
+            try {
+                const res = await apiRequest('/dashboard/stats');
+                if (res.success) {
+                    document.getElementById('stat-sessions').textContent = res.stats.sessions.connected_sessions || 0;
+                    document.getElementById('stat-chats').textContent = res.stats.chats.total_chats || 0;
+                    document.getElementById('stat-unread').textContent = res.stats.chats.total_unread || 0;
+                    document.getElementById('stat-users').textContent = res.stats.users.total_users || 0;
+                }
+
+                // Cargar chats recientes
+                const chatsRes = await apiRequest('/chats');
+                if (chatsRes.success) {
+                    renderRecentChats(chatsRes.chats.slice(0, 5));
+                }
+            } catch (err) {
+                console.error('Error cargando dashboard:', err);
+            }
+        }
+
+        function renderRecentChats(chats) {
+            const container = document.getElementById('recent-chats');
+            if (chats.length === 0) {
+                container.innerHTML = '<div class="empty-state p-4"><i class="bi bi-chat-dots"></i><p>No hay conversaciones</p></div>';
+                return;
+            }
+
+            container.innerHTML = chats.map(chat => `
+                <div class="chat-item" onclick="openChat(${chat.id})">
+                    <div class="chat-avatar">${(chat.contact_name || chat.remote_jid).charAt(0).toUpperCase()}</div>
+                    <div class="chat-info">
+                        <div class="chat-name">${chat.contact_name || formatPhone(chat.remote_jid)}</div>
+                        <div class="chat-preview">${chat.last_message_body || 'Sin mensajes'}</div>
+                    </div>
+                    <div class="text-end">
+                        <div class="chat-time">${formatTime(chat.last_message_time)}</div>
+                        ${chat.unread_count > 0 ? `<div class="unread-badge">${chat.unread_count}</div>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ==========================================
+        // 💬 CHATS
+        // ==========================================
+        let allSessionsData = [];
+        let allChatsData = [];
+
+        async function loadChats() {
+            try {
+                // Cargar empresas para el filtro (solo SuperAdmin)
+                if (currentUser.role === 'superadmin') {
+                    await loadCompaniesForFilter('filter-company-chats');
+                    document.getElementById('filter-company-chats').style.display = 'block';
+                } else {
+                    document.getElementById('filter-company-chats').style.display = 'none';
+                }
+
+                // Cargar sesiones
+                const sessionsRes = await apiRequest('/sessions');
+                if (sessionsRes.success) {
+                    allSessionsData = sessionsRes.sessions;
+                    updateSessionsFilter();
+                }
+
+                // Cargar chats
+                await filterAndLoadChats();
+            } catch (err) {
+                console.error('Error cargando chats:', err);
+            }
+        }
+
+        function updateSessionsFilter() {
+            const companyId = document.getElementById('filter-company-chats').value;
+            let filteredSessions = allSessionsData;
+            
+            if (companyId) {
+                filteredSessions = allSessionsData.filter(s => s.company_id == companyId);
+            }
+
+            const select = document.getElementById('filter-session');
+            select.innerHTML = '<option value="">Todas las sesiones</option>' +
+                filteredSessions.map(s => `<option value="${s.id}">${s.session_name}${s.company_name ? ` (${s.company_name})` : ''}</option>`).join('');
+        }
+
+        // ==========================================
+        // 📱 NUEVO CHAT
+        // ==========================================
+        async function showNewChatModal() {
+            // Limpiar campos
+            document.getElementById('new-chat-phone').value = '';
+            document.getElementById('new-chat-message').value = '';
+            
+            // Cargar sesiones disponibles
+            const select = document.getElementById('new-chat-session');
+            select.innerHTML = '<option value="">-- Selecciona una sesión --</option>';
+            
+            try {
+                const res = await apiRequest('/sessions');
+                if (res.success) {
+                    // Filtrar solo sesiones conectadas
+                    const connectedSessions = res.sessions.filter(s => s.status === 'connected');
+                    
+                    if (connectedSessions.length === 0) {
+                        select.innerHTML = '<option value="">⚠️ No hay sesiones conectadas</option>';
+                    } else {
+                        connectedSessions.forEach(s => {
+                            const option = document.createElement('option');
+                            option.value = s.id;
+                            option.textContent = `${s.session_name} (${s.phone_number || 'Sin número'})`;
+                            select.appendChild(option);
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error('Error cargando sesiones:', err);
+            }
+            
+            new bootstrap.Modal(document.getElementById('newChatModal')).show();
+        }
+
+        async function startNewChat() {
+            const phoneNumber = document.getElementById('new-chat-phone').value.trim();
+            const sessionId = document.getElementById('new-chat-session').value;
+            const message = document.getElementById('new-chat-message').value.trim();
+            
+            if (!phoneNumber) {
+                alert('Ingresa un número de teléfono');
+                return;
+            }
+            if (!sessionId) {
+                alert('Selecciona una sesión de WhatsApp');
+                return;
+            }
+            if (!message) {
+                alert('Escribe un mensaje');
+                return;
+            }
+            
+            try {
+                const res = await apiRequest('/chats/new', 'POST', {
+                    phoneNumber,
+                    sessionId: parseInt(sessionId),
+                    message
+                });
+                
+                if (res.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('newChatModal')).hide();
+                    alert('✅ Mensaje enviado a +' + res.phoneNumber);
+                    // Recargar chats y abrir el nuevo
+                    await loadChats();
+                    if (res.chatId) {
+                        openChat(res.chatId);
+                    }
+                } else {
+                    alert('Error: ' + res.error);
+                }
+            } catch (err) {
+                console.error('Error iniciando chat:', err);
+                alert('Error al enviar el mensaje');
+            }
+        }
+
+        async function filterAndLoadChats() {
+            const sessionId = document.getElementById('filter-session').value;
+            const companyId = document.getElementById('filter-company-chats').value;
+            
+            let url = '/chats';
+            const params = [];
+            if (sessionId) params.push(`session_id=${sessionId}`);
+            if (companyId) params.push(`company_id=${companyId}`);
+            if (params.length > 0) url += '?' + params.join('&');
+
+            const res = await apiRequest(url);
+            if (res.success) {
+                allChatsData = res.chats;
+                renderChatsList(res.chats);
+            }
+        }
+
+        async function loadCompaniesForFilter(selectId) {
+            if (companiesList.length === 0) {
+                const res = await apiRequest('/companies');
+                if (res.success) companiesList = res.companies;
+            }
+            
+            document.getElementById(selectId).innerHTML = '<option value="">Todas las empresas</option>' +
+                companiesList.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        }
+
+        document.getElementById('filter-session').addEventListener('change', filterAndLoadChats);
+        document.getElementById('filter-company-chats').addEventListener('change', () => {
+            updateSessionsFilter();
+            filterAndLoadChats();
+        });
+
+        function renderChatsList(chats) {
+            const container = document.getElementById('chats-list');
+            if (chats.length === 0) {
+                container.innerHTML = '<div class="empty-state p-4"><i class="bi bi-chat-dots"></i><p>No hay conversaciones</p></div>';
+                return;
+            }
+
+            container.innerHTML = chats.map(chat => `
+                <div class="chat-item ${currentChat?.id === chat.id ? 'active' : ''}" onclick="openChat(${chat.id})">
+                    <div class="chat-avatar">${(chat.contact_name || chat.remote_jid).charAt(0).toUpperCase()}</div>
+                    <div class="chat-info">
+                        <div class="chat-name">${chat.contact_name || formatPhone(chat.remote_jid)}</div>
+                        <div class="chat-preview">${chat.last_message_body || 'Sin mensajes'}</div>
+                        ${chat.assigned_name ? `<small class="text-muted"><i class="bi bi-person"></i> ${chat.assigned_name}</small>` : ''}
+                    </div>
+                    <div class="text-end">
+                        <div class="chat-time">${formatTime(chat.last_message_time)}</div>
+                        ${chat.unread_count > 0 ? `<div class="unread-badge">${chat.unread_count}</div>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function openChat(chatId) {
+            try {
+                const res = await apiRequest(`/chats/${chatId}/messages`);
+                if (res.success) {
+                    currentChat = res.chat;
+                    currentChat.id = chatId;
+                    
+                    // Unirse a la sala del chat para recibir mensajes en tiempo real
+                    if (socket) {
+                        socket.emit('join_chat', chatId);
+                    }
+                    
+                    renderChatWindow(res.chat, res.messages);
+                    loadChatsQuiet(); // Actualizar lista para marcar como leído
+                }
+            } catch (err) {
+                console.error('Error abriendo chat:', err);
+            }
+        }
+
+        function renderChatWindow(chat, messages) {
+            const container = document.getElementById('chat-window-container');
+            const canAssign = currentUser.role !== 'executive';
+            
+            container.innerHTML = `
+                <div class="chat-window h-100">
+                    <div class="chat-header">
+                        <div class="chat-avatar">${(chat.contact_name || chat.remote_jid).charAt(0).toUpperCase()}</div>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold">${chat.contact_name || formatPhone(chat.remote_jid)}</div>
+                            <small class="text-muted">${formatPhone(chat.remote_jid)}</small>
+                        </div>
+                        ${canAssign ? `<button class="btn btn-outline-light btn-sm" onclick="showAssignModal(${chat.id})">
+                            <i class="bi bi-person-plus"></i> Asignar
+                        </button>` : ''}
+                    </div>
+                    <div class="messages-container" id="messages-container">
+                        ${messages.map(m => `
+                            <div class="message ${m.from_me ? 'sent' : 'received'}">
+                                <div>${escapeHtml(m.body)}</div>
+                                <div class="message-time">${formatTime(m.timestamp)}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" class="chat-input" id="message-input" placeholder="Escribe un mensaje..." onkeypress="handleMessageKeypress(event)">
+                        <button class="send-btn" onclick="sendMessage()">
+                            <i class="bi bi-send"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // Scroll al final
+            const msgContainer = document.getElementById('messages-container');
+            msgContainer.scrollTop = msgContainer.scrollHeight;
+        }
+
+        function handleMessageKeypress(e) {
+            if (e.key === 'Enter') sendMessage();
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+            if (!message || !currentChat) return;
+
+            try {
+                const res = await apiRequest(`/chats/${currentChat.id}/send`, 'POST', { message });
+                if (res.success) {
+                    input.value = '';
+                    openChat(currentChat.id); // Recargar mensajes
+                } else {
+                    alert(res.error);
+                }
+            } catch (err) {
+                alert('Error enviando mensaje');
+            }
+        }
+
+        async function showAssignModal(chatId) {
+            currentChat = { id: chatId };
+            
+            // Cargar usuarios para asignar
+            const res = await apiRequest('/users');
+            if (res.success) {
+                const select = document.getElementById('assign-user');
+                select.innerHTML = '<option value="">Sin asignar</option>' +
+                    res.users.filter(u => u.role === 'executive').map(u => 
+                        `<option value="${u.id}">${u.full_name}</option>`
+                    ).join('');
+            }
+            
+            new bootstrap.Modal(document.getElementById('assignModal')).show();
+        }
+
+        async function assignChat() {
+            const userId = document.getElementById('assign-user').value;
+            
+            try {
+                const res = await apiRequest(`/chats/${currentChat.id}/assign`, 'POST', { userId: userId || null });
+                if (res.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('assignModal')).hide();
+                    loadChats();
+                } else {
+                    alert(res.error);
+                }
+            } catch (err) {
+                alert('Error asignando chat');
+            }
+        }
+
+        // ==========================================
+        // 📱 SESIONES
+        // ==========================================
+        let allSessionsForFilter = [];
+
+        async function loadSessions() {
+            try {
+                // Cargar empresas para el filtro (solo SuperAdmin)
+                if (currentUser.role === 'superadmin') {
+                    await loadCompaniesForFilter('filter-company-sessions');
+                    document.getElementById('filter-company-sessions').style.display = 'block';
+                } else {
+                    document.getElementById('filter-company-sessions').style.display = 'none';
+                }
+
+                const res = await apiRequest('/sessions');
+                if (res.success) {
+                    allSessionsForFilter = res.sessions;
+                    filterAndRenderSessions();
+                }
+            } catch (err) {
+                console.error('Error cargando sesiones:', err);
+            }
+        }
+
+        function filterAndRenderSessions() {
+            const companyId = document.getElementById('filter-company-sessions').value;
+            let filteredSessions = allSessionsForFilter;
+            
+            if (companyId) {
+                filteredSessions = allSessionsForFilter.filter(s => s.company_id == companyId);
+            }
+            
+            renderSessionsGrid(filteredSessions);
+        }
+
+        document.getElementById('filter-company-sessions').addEventListener('change', filterAndRenderSessions);
+
+        function renderSessionsGrid(sessions) {
+            const container = document.getElementById('sessions-grid');
+            if (sessions.length === 0) {
+                container.innerHTML = '<div class="col-12"><div class="empty-state"><i class="bi bi-phone"></i><h5>No hay sesiones</h5><p>Crea una nueva sesión de WhatsApp</p></div></div>';
+                return;
+            }
+
+            container.innerHTML = sessions.map(s => {
+                const canAssign = currentUser.role === 'superadmin' || currentUser.role === 'admin';
+                const assignedInfo = s.assigned_name 
+                    ? `<span class="badge bg-info"><i class="bi bi-person-check"></i> ${s.assigned_name}</span>`
+                    : `<span class="badge bg-secondary"><i class="bi bi-person-dash"></i> Sin asignar</span>`;
+                
+                return `
+                <div class="col-md-4">
+                    <div class="session-card">
+                        <div class="session-status">
+                            <span class="status-dot ${s.status}"></span>
+                            <span>${s.status === 'connected' ? 'Conectado' : s.status === 'connecting' ? 'Conectando...' : 'Desconectado'}</span>
+                        </div>
+                        <h5 class="text-white">${s.session_name}</h5>
+                        <p class="mb-2" style="color: #e9edef;">
+                            ${s.phone_number ? `<i class="bi bi-phone"></i> ${s.phone_number}` : 'Sin número'}
+                            ${s.company_name ? `<br><i class="bi bi-building"></i> ${s.company_name}` : ''}
+                        </p>
+                        <div class="mb-2">
+                            <small class="text-muted">Ejecutivo asignado:</small><br>
+                            ${assignedInfo}
+                            ${canAssign ? `
+                                <button class="btn btn-outline-primary btn-sm ms-2" onclick="showAssignSessionModal(${s.id}, '${s.session_name}', ${s.assigned_to || 'null'}, ${s.company_id})" title="Asignar ejecutivo">
+                                    <i class="bi bi-person-gear"></i>
+                                </button>
+                            ` : ''}
+                        </div>
+                        <div id="session-qr-${s.session_name}"></div>
+                        <div class="d-flex gap-2 mt-3 flex-wrap">
+                            ${s.status !== 'connected' ? `
+                                <button class="btn btn-outline-success btn-sm flex-grow-1" onclick="connectSession('${s.session_name}')">
+                                    <i class="bi bi-qr-code"></i> Conectar
+                                </button>
+                                <button class="btn btn-outline-warning btn-sm" onclick="regenerateSession('${s.session_name}')" title="Regenerar sesión">
+                                    <i class="bi bi-arrow-clockwise"></i>
+                                </button>
+                            ` : ''}
+                            ${s.status === 'connected' ? `
+                                <button class="btn btn-outline-danger btn-sm flex-grow-1" onclick="disconnectSession('${s.session_name}')">
+                                    <i class="bi bi-x-circle"></i> Desconectar
+                                </button>
+                            ` : ''}
+                            ${canAssign ? `
+                                <button class="btn btn-danger btn-sm" onclick="deleteSession(${s.id}, '${s.session_name}')" title="Eliminar sesión permanentemente">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        async function connectSession(sessionName) {
+            // Primero intentar reconectar
+            try {
+                await apiRequest(`/sessions/${sessionName}/reconnect`, 'POST');
+            } catch (err) {}
+
+            // Iniciar polling del QR
+            const container = document.getElementById(`session-qr-${sessionName}`);
+            container.innerHTML = '<div class="text-center p-3"><div class="spinner-border text-success"></div><p class="mt-2">Generando QR...</p></div>';
+
+            if (qrInterval) clearInterval(qrInterval);
+            qrInterval = setInterval(async () => {
+                try {
+                    const res = await apiRequest(`/sessions/${sessionName}/qr`);
+                    
+                    if (res.status === 'connected') {
+                        clearInterval(qrInterval);
+                        loadSessions();
+                    } else if (res.qr) {
+                        container.innerHTML = `
+                            <div class="qr-container">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(res.qr)}" alt="QR">
+                                <p class="text-dark mt-2 small">Escanea con WhatsApp</p>
+                            </div>
+                        `;
+                    }
+                } catch (err) {
+                    console.error('Error obteniendo QR:', err);
+                }
+            }, 3000);
+        }
+
+        async function disconnectSession(sessionName) {
+            if (!confirm('¿Cerrar esta sesión de WhatsApp?')) return;
+            
+            try {
+                const res = await apiRequest(`/sessions/${sessionName}/logout`, 'POST');
+                if (res.success) {
+                    loadSessions();
+                }
+            } catch (err) {
+                alert('Error desconectando sesión');
+            }
+        }
+
+        async function regenerateSession(sessionName) {
+            if (!confirm('¿Regenerar esta sesión? Se eliminarán los datos de autenticación previos y deberás escanear el QR nuevamente.')) return;
+            
+            try {
+                // Primero desconectar/limpiar
+                await apiRequest(`/sessions/${sessionName}/regenerate`, 'POST');
+                
+                // Recargar sesiones
+                await loadSessions();
+                
+                // Automáticamente intentar conectar
+                setTimeout(() => {
+                    connectSession(sessionName);
+                }, 500);
+            } catch (err) {
+                console.error('Error regenerando sesión:', err);
+                alert('Error regenerando sesión. Intenta conectar manualmente.');
+            }
+        }
+
+        async function deleteSession(sessionId, sessionName) {
+            if (!confirm(`⚠️ ¿ELIMINAR la sesión "${sessionName}"?\n\nEsto eliminará:\n- La sesión de WhatsApp\n- Todos los chats asociados\n- Todos los mensajes\n\nEsta acción NO se puede deshacer.`)) return;
+            if (!confirm('¿Estás SEGURO? Se perderán todos los datos de esta sesión.')) return;
+            
+            try {
+                const res = await apiRequest(`/sessions/${sessionId}`, 'DELETE');
+                if (res.success) {
+                    alert('Sesión eliminada correctamente');
+                    loadSessions();
+                } else {
+                    alert('Error: ' + res.error);
+                }
+            } catch (err) {
+                console.error('Error eliminando sesión:', err);
+                alert('Error al eliminar la sesión');
+            }
+        }
+
+        // ==========================================
+        // 👤 ASIGNACIÓN DE SESIONES A EJECUTIVOS
+        // ==========================================
+        async function showAssignSessionModal(sessionId, sessionName, currentAssignedTo, companyId) {
+            document.getElementById('assign-session-id').value = sessionId;
+            document.getElementById('assign-session-name').textContent = sessionName;
+            
+            // Cargar ejecutivos de la empresa DE LA SESIÓN (no del usuario logueado)
+            const select = document.getElementById('assign-executive');
+            select.innerHTML = '<option value="">-- Sin asignar (disponible para todos) --</option>';
+            
+            try {
+                const res = await apiRequest('/users');
+                if (res.success) {
+                    // Filtrar solo ejecutivos ACTIVOS de la MISMA EMPRESA que la sesión
+                    const executives = res.users.filter(u => 
+                        u.role === 'executive' && 
+                        u.status === 'active' &&
+                        u.company_id === companyId  // Siempre filtrar por empresa de la sesión
+                    );
+                    
+                    if (executives.length === 0) {
+                        const noExecOption = document.createElement('option');
+                        noExecOption.value = '';
+                        noExecOption.textContent = '⚠️ No hay ejecutivos activos en esta empresa';
+                        noExecOption.disabled = true;
+                        select.appendChild(noExecOption);
+                    } else {
+                        executives.forEach(exec => {
+                            const option = document.createElement('option');
+                            option.value = exec.id;
+                            option.textContent = `${exec.full_name} (${exec.username})`;
+                            if (currentAssignedTo === exec.id) {
+                                option.selected = true;
+                            }
+                            select.appendChild(option);
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error('Error cargando ejecutivos:', err);
+            }
+            
+            new bootstrap.Modal(document.getElementById('assignSessionModal')).show();
+        }
+
+        async function assignSessionToExecutive() {
+            const sessionId = document.getElementById('assign-session-id').value;
+            const userId = document.getElementById('assign-executive').value;
+            
+            try {
+                const res = await apiRequest(`/sessions/${sessionId}/assign`, 'POST', {
+                    userId: userId ? parseInt(userId) : null
+                });
+                
+                if (res.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('assignSessionModal')).hide();
+                    loadSessions();
+                    alert(res.message);
+                } else {
+                    alert('Error: ' + res.error);
+                }
+            } catch (err) {
+                console.error('Error asignando sesión:', err);
+                alert('Error al asignar la sesión');
+            }
+        }
+
+        function showCreateSessionModal() {
+            if (currentUser.role === 'superadmin') {
+                loadCompaniesForSelect('session-company');
+                document.getElementById('session-company-group').style.display = 'block';
+            } else {
+                document.getElementById('session-company-group').style.display = 'none';
+            }
+            new bootstrap.Modal(document.getElementById('sessionModal')).show();
+        }
+
+        async function createSession() {
+            const sessionName = document.getElementById('session-name').value.trim();
+            const companyId = document.getElementById('session-company').value;
+
+            if (!sessionName) {
+                alert('Ingresa un nombre para la sesión');
+                return;
+            }
+
+            try {
+                const body = { sessionName };
+                if (currentUser.role === 'superadmin' && companyId) {
+                    body.company_id = companyId;
+                }
+
+                const res = await apiRequest('/sessions', 'POST', body);
+                if (res.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('sessionModal')).hide();
+                    loadSessions();
+                    setTimeout(() => connectSession(sessionName), 1000);
+                } else {
+                    alert(res.error);
+                }
+            } catch (err) {
+                alert('Error creando sesión');
+            }
+        }
+
+        // ==========================================
+        // 👥 USUARIOS
+        // ==========================================
+        async function loadUsers() {
+            try {
+                const res = await apiRequest('/users');
+                if (res.success) {
+                    renderUsersTable(res.users);
+                }
+            } catch (err) {
+                console.error('Error cargando usuarios:', err);
+            }
+        }
+
+        function renderUsersTable(users) {
+            const tbody = document.getElementById('users-table');
+            tbody.innerHTML = users.map(u => {
+                const canManage = u.id !== currentUser.id && (currentUser.role === 'superadmin' || (currentUser.role === 'admin' && u.role === 'executive'));
+                
+                let actionButtons = '';
+                if (canManage) {
+                    if (u.status === 'active') {
+                        actionButtons = `
+                            <button class="btn btn-sm btn-outline-warning me-1" onclick="toggleUserStatus(${u.id}, 'inactive')" title="Desactivar">
+                                <i class="bi bi-pause-circle"></i>
+                            </button>
+                        `;
+                    } else {
+                        actionButtons = `
+                            <button class="btn btn-sm btn-outline-success me-1" onclick="toggleUserStatus(${u.id}, 'active')" title="Habilitar">
+                                <i class="bi bi-play-circle"></i>
+                            </button>
+                        `;
+                    }
+                    actionButtons += `
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteUserPermanent(${u.id})" title="Eliminar permanentemente">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    `;
+                }
+                
+                return `
+                    <tr>
+                        <td><strong>${u.username}</strong></td>
+                        <td>${u.full_name}</td>
+                        <td><span class="badge-role badge-${u.role}">${getRoleName(u.role)}</span></td>
+                        <td>${u.company_name || '-'}</td>
+                        <td><span class="badge-role badge-${u.status}">${u.status}</span></td>
+                        <td>${actionButtons}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function showCreateUserModal() {
+            // Limpiar campos manualmente
+            document.getElementById('user-fullname').value = '';
+            document.getElementById('user-username').value = '';
+            document.getElementById('user-password').value = '';
+            
+            const roleSelect = document.getElementById('user-role');
+            const companyGroup = document.getElementById('company-select-group');
+
+            if (currentUser.role === 'admin') {
+                // Admin de empresa: siempre crea ejecutivos de su propia empresa
+                roleSelect.value = 'executive';
+                roleSelect.disabled = true;
+                companyGroup.style.display = 'none';
+            } else {
+                // SuperAdmin: puede elegir rol libremente
+                roleSelect.disabled = false;
+                roleSelect.value = 'executive'; // valor por defecto
+                companyGroup.style.display = 'block';
+                await loadCompaniesForSelect('user-company');
+
+                const companySelect = document.getElementById('user-company');
+                if (companySelect.options.length > 0) {
+                    companySelect.selectedIndex = 0;
+                }
+            }
+
+            new bootstrap.Modal(document.getElementById('userModal')).show();
+        }
+
+        async function createUser() {
+            const fullNameInput = document.getElementById('user-fullname');
+            const usernameInput = document.getElementById('user-username');
+            const passwordInput = document.getElementById('user-password');
+            const roleSelect = document.getElementById('user-role');
+            const companySelect = document.getElementById('user-company');
+
+            const fullName = fullNameInput.value.trim();
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+            const companyId = companySelect ? companySelect.value : '';
+            
+            // Obtener el rol DIRECTAMENTE del select usando selectedIndex
+            const selectedOption = roleSelect.options[roleSelect.selectedIndex];
+            const role = selectedOption ? selectedOption.value : 'executive';
+
+            console.log('=== DEBUG CREAR USUARIO ===');
+            console.log('roleSelect.value:', roleSelect.value);
+            console.log('roleSelect.selectedIndex:', roleSelect.selectedIndex);
+            console.log('selectedOption.value:', selectedOption ? selectedOption.value : 'N/A');
+            console.log('selectedOption.text:', selectedOption ? selectedOption.text : 'N/A');
+            console.log('role final:', role);
+
+            // Validar campos antes de enviar
+            if (!fullName) { alert('Falta el nombre completo'); return; }
+            if (!username) { alert('Falta el nombre de usuario'); return; }
+            if (!password) { alert('Falta la contraseña'); return; }
+
+            const data = {
+                full_name: fullName,
+                username: username,
+                password: password,
+                role: role
+            };
+
+            // Agregar company_id si es superadmin
+            if (currentUser.role === 'superadmin') {
+                if (!companyId) {
+                    alert('Selecciona una empresa para el nuevo usuario');
+                    return;
+                }
+                data.company_id = parseInt(companyId, 10);
+            }
+
+            console.log('Enviando datos:', { ...data, password: '***' });
+
+            try {
+                const res = await apiRequest('/auth/register', 'POST', data);
+                if (res.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
+                    loadUsers();
+                    alert('Usuario creado exitosamente');
+                } else {
+                    alert('Error: ' + res.error);
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                alert('Error creando usuario');
+            }
+        }
+
+        // Cambiar estado del usuario (activar/desactivar)
+        async function toggleUserStatus(userId, newStatus) {
+            const action = newStatus === 'active' ? 'habilitar' : 'desactivar';
+            if (!confirm(`¿Deseas ${action} este usuario?`)) return;
+            
+            try {
+                const res = await apiRequest(`/users/${userId}/status`, 'PUT', { status: newStatus });
+                if (res.success) {
+                    loadUsers();
+                    alert(`Usuario ${newStatus === 'active' ? 'habilitado' : 'desactivado'} exitosamente`);
+                } else {
+                    alert(res.error);
+                }
+            } catch (err) {
+                alert(`Error al ${action} usuario`);
+            }
+        }
+
+        // Eliminar usuario permanentemente
+        async function deleteUserPermanent(userId) {
+            if (!confirm('⚠️ ¿ELIMINAR PERMANENTEMENTE este usuario?\n\nEsta acción NO se puede deshacer.')) return;
+            if (!confirm('¿Estás SEGURO? El usuario será eliminado de la base de datos.')) return;
+            
+            try {
+                const res = await apiRequest(`/users/${userId}/permanent`, 'DELETE');
+                if (res.success) {
+                    loadUsers();
+                    alert('Usuario eliminado permanentemente');
+                } else {
+                    alert(res.error);
+                }
+            } catch (err) {
+                alert('Error eliminando usuario');
+            }
+        }
+
+        // ==========================================
+        // 🏢 EMPRESAS
+        // ==========================================
+        async function loadCompanies() {
+            try {
+                const res = await apiRequest('/companies');
+                if (res.success) {
+                    companiesList = res.companies;
+                    renderCompaniesTable(res.companies);
+                }
+            } catch (err) {
+                console.error('Error cargando empresas:', err);
+            }
+        }
+
+        function renderCompaniesTable(companies) {
+            const tbody = document.getElementById('companies-table');
+            tbody.innerHTML = companies.map(c => `
+                <tr>
+                    <td>${c.id}</td>
+                    <td><strong>${c.name}</strong></td>
+                    <td><span class="badge bg-info">${c.plan}</span></td>
+                    <td>${c.user_count || 0} / ${c.max_users}</td>
+                    <td>${c.session_count || 0} / ${c.max_sessions}</td>
+                    <td><span class="badge-role badge-${c.status}">${c.status}</span></td>
+                    <td>
+                        <button class="btn btn-outline-danger btn-sm" onclick="deleteCompany(${c.id})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function showCreateCompanyModal() {
+            document.getElementById('company-form').reset();
+            new bootstrap.Modal(document.getElementById('companyModal')).show();
+        }
+
+        async function createCompany() {
+            const data = {
+                name: document.getElementById('company-name').value,
+                plan: document.getElementById('company-plan').value,
+                max_sessions: parseInt(document.getElementById('company-max-sessions').value),
+                max_users: parseInt(document.getElementById('company-max-users').value)
+            };
+
+            try {
+                const res = await apiRequest('/companies', 'POST', data);
+                if (res.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('companyModal')).hide();
+                    loadCompanies();
+                } else {
+                    alert(res.error);
+                }
+            } catch (err) {
+                alert('Error creando empresa');
+            }
+        }
+
+        async function deleteCompany(companyId) {
+            if (!confirm('¿Desactivar esta empresa?')) return;
+            
+            try {
+                const res = await apiRequest(`/companies/${companyId}`, 'DELETE');
+                if (res.success) {
+                    loadCompanies();
+                } else {
+                    alert(res.error);
+                }
+            } catch (err) {
+                alert('Error desactivando empresa');
+            }
+        }
+
+        async function loadCompaniesForSelect(selectId) {
+            if (companiesList.length === 0) {
+                const res = await apiRequest('/companies');
+                if (res.success) companiesList = res.companies;
+            }
+            
+            document.getElementById(selectId).innerHTML = companiesList.map(c => 
+                `<option value="${c.id}">${c.name}</option>`
+            ).join('');
+        }
+
+        // ==========================================
+        // 🔧 UTILIDADES
+        // ==========================================
+        async function apiRequest(endpoint, method = 'GET', body = null) {
+            const options = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-access-token': localStorage.getItem('token')
+                }
+            };
+            if (body) options.body = JSON.stringify(body);
+
+            const res = await fetch(`${API_URL}${endpoint}`, options);
+            return await res.json();
+        }
+
+        function showError(elementId, message) {
+            const el = document.getElementById(elementId);
+            el.textContent = message;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 5000);
+        }
+
+        function formatPhone(jid) {
+            if (!jid) return 'Desconocido';
+            
+            // Limpiar sufijos de WhatsApp
+            let phone = jid.replace(/@.*$/, '');
+            
+            // Si es un LID (número muy largo o contiene ':'), mostrar como "Contacto"
+            if (phone.length > 15 || phone.includes(':')) {
+                return `📱 Contacto #${phone.substring(0, 8)}...`;
+            }
+            
+            // Formatear para Chile si empieza con 56
+            if (phone.startsWith('56') && phone.length >= 11) {
+                return `+${phone.slice(0,2)} ${phone.slice(2,3)} ${phone.slice(3,7)} ${phone.slice(7)}`;
+            }
+            
+            // Para México (52)
+            if (phone.startsWith('52') && phone.length >= 12) {
+                return `+${phone.slice(0,2)} ${phone.slice(2,4)} ${phone.slice(4,8)} ${phone.slice(8)}`;
+            }
+            
+            // Para otros países, solo agregar el +
+            if (phone.length >= 10 && phone.length <= 15) {
+                return `+${phone}`;
+            }
+            
+            return phone || 'Desconocido';
+        }
+
+        function formatTime(timestamp) {
+            if (!timestamp) return '';
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+
+            if (diff < 86400000) { // Menos de 24h
+                return date.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+            } else if (diff < 604800000) { // Menos de 1 semana
+                return date.toLocaleDateString('es-CL', { weekday: 'short' });
+            }
+            return date.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit' });
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
