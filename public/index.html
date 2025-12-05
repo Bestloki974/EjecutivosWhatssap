@@ -1095,11 +1095,29 @@
                 }
             });
 
-            // Mensaje en chat específico
+            // Mensaje en chat específico (ya manejado por new_message, solo para log)
             socket.on('chat_message', (data) => {
-                if (currentChat && currentChat.id === data.chatId) {
-                    appendMessage(data);
-                }
+                console.log('📨 Chat message recibido:', data.chatId);
+                // No llamar appendMessage aquí - ya se maneja en new_message
+            });
+
+            // Actualización de estado de mensaje (leído/entregado)
+            socket.on('message_ack', (data) => {
+                console.log('📬 Estado actualizado:', data);
+                // Buscar y actualizar el icono del mensaje
+                const messageElements = document.querySelectorAll('.message.sent');
+                messageElements.forEach(el => {
+                    const timeDiv = el.querySelector('.message-time');
+                    if (timeDiv && timeDiv.dataset.messageId === data.messageId) {
+                        const icon = timeDiv.querySelector('i');
+                        if (icon) {
+                            icon.className = data.ack === 3 ? 'bi bi-check-all text-primary' :
+                                            data.ack === 2 ? 'bi bi-check-all text-muted' :
+                                            'bi bi-check text-muted';
+                            icon.title = data.ack === 3 ? 'Leído' : data.ack === 2 ? 'Entregado' : 'Enviado';
+                        }
+                    }
+                });
             });
 
             // Sesión conectada
@@ -1124,14 +1142,30 @@
         }
 
         // Agregar mensaje al chat actual sin recargar todo
+        const addedMessages = new Set(); // Para evitar duplicados
+        
         function appendMessage(data) {
             const container = document.getElementById('messages-container');
             if (!container) return;
+            
+            // Evitar duplicados usando el ID del mensaje o un hash del contenido+timestamp
+            const msgKey = data.messageId || `${data.body}_${data.timestamp}`;
+            if (addedMessages.has(msgKey)) {
+                console.log('⚠️ Mensaje duplicado ignorado:', msgKey);
+                return;
+            }
+            addedMessages.add(msgKey);
+            
+            // Limpiar mensajes viejos del set después de 1000 entradas
+            if (addedMessages.size > 1000) {
+                const entries = Array.from(addedMessages);
+                entries.slice(0, 500).forEach(k => addedMessages.delete(k));
+            }
 
             const msgDiv = document.createElement('div');
             msgDiv.className = `message ${data.fromMe ? 'sent' : 'received'}`;
             msgDiv.innerHTML = `
-                <div>${escapeHtml(data.body)}</div>
+                <div>${escapeHtml(data.body || '')}</div>
                 <div class="message-time">${formatTime(data.timestamp)}</div>
             `;
             container.appendChild(msgDiv);
@@ -1507,6 +1541,19 @@
             }
         }
 
+        // Función para obtener icono de estado del mensaje
+        function getMessageStatusIcon(ack, fromMe) {
+            if (!fromMe) return ''; // Solo mostrar estado en mensajes enviados
+            
+            switch(ack) {
+                case 0: return '<i class="bi bi-clock text-muted" title="Enviando..."></i>';
+                case 1: return '<i class="bi bi-check text-muted" title="Enviado"></i>';
+                case 2: return '<i class="bi bi-check-all text-muted" title="Entregado"></i>';
+                case 3: return '<i class="bi bi-check-all text-primary" title="Leído"></i>';
+                default: return '<i class="bi bi-check text-muted" title="Enviado"></i>';
+            }
+        }
+
         function renderChatWindow(chat, messages) {
             const container = document.getElementById('chat-window-container');
             const canAssign = currentUser.role !== 'executive';
@@ -1519,15 +1566,23 @@
                             <div class="fw-semibold">${chat.contact_name || formatPhone(chat.remote_jid)}</div>
                             <small class="text-muted">${formatPhone(chat.remote_jid)}</small>
                         </div>
-                        ${canAssign ? `<button class="btn btn-outline-light btn-sm" onclick="showAssignModal(${chat.id})">
-                            <i class="bi bi-person-plus"></i> Asignar
-                        </button>` : ''}
+                        <div class="d-flex gap-2">
+                            ${canAssign ? `<button class="btn btn-outline-light btn-sm" onclick="showAssignModal(${chat.id})">
+                                <i class="bi bi-person-plus"></i> Asignar
+                            </button>` : ''}
+                            <button class="btn btn-outline-danger btn-sm" onclick="deleteChat(${chat.id})" title="Eliminar chat">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="messages-container" id="messages-container">
                         ${messages.map(m => `
                             <div class="message ${m.from_me ? 'sent' : 'received'}">
-                                <div>${escapeHtml(m.body)}</div>
-                                <div class="message-time">${formatTime(m.timestamp)}</div>
+                                <div>${escapeHtml(m.body || '')}</div>
+                                <div class="message-time" data-message-id="${m.whatsapp_id || ''}">
+                                    ${formatTime(m.timestamp)}
+                                    ${getMessageStatusIcon(m.ack, m.from_me)}
+                                </div>
                             </div>
                         `).join('')}
                     </div>
@@ -1564,6 +1619,34 @@
                 }
             } catch (err) {
                 alert('Error enviando mensaje');
+            }
+        }
+
+        // Eliminar chat actual
+        async function deleteChat(chatId) {
+            if (!confirm('¿Estás seguro de eliminar este chat y todos sus mensajes? Esta acción no se puede deshacer.')) {
+                return;
+            }
+
+            try {
+                const res = await apiRequest(`/chats/${chatId}`, 'DELETE');
+                if (res.success) {
+                    currentChat = null;
+                    document.getElementById('chat-window-container').innerHTML = `
+                        <div class="d-flex align-items-center justify-content-center h-100 text-muted">
+                            <div class="text-center">
+                                <i class="bi bi-chat-dots" style="font-size: 4rem; opacity: 0.3;"></i>
+                                <p class="mt-3">Chat eliminado. Selecciona otra conversación.</p>
+                            </div>
+                        </div>
+                    `;
+                    loadChats(); // Recargar lista de chats
+                    alert('Chat eliminado exitosamente');
+                } else {
+                    alert('Error: ' + res.error);
+                }
+            } catch (err) {
+                alert('Error al eliminar el chat');
             }
         }
 
@@ -2206,18 +2289,63 @@
             return phone || 'Desconocido';
         }
 
+        // Zona horaria de Chile
+        const TIMEZONE_CHILE = 'America/Santiago';
+        
         function formatTime(timestamp) {
             if (!timestamp) return '';
-            const date = new Date(timestamp);
+            
+            // Parsear timestamp de MySQL (viene como string: "2025-12-05 11:46:00")
+            // MySQL lo guarda en hora del servidor (EST = UTC-5)
+            // Chile está en UTC-3 (verano), diferencia de +2 horas
+            let date;
+            
+            if (typeof timestamp === 'string' && !timestamp.includes('T') && !timestamp.includes('Z')) {
+                // Formato MySQL: "2025-12-05 11:46:00" (sin timezone)
+                // Asumimos que está en hora del servidor (EST = UTC-5)
+                // Agregamos la info de timezone para convertir correctamente
+                const serverOffset = -5; // EST (Eastern Standard Time)
+                const [datePart, timePart] = timestamp.split(' ');
+                
+                if (datePart && timePart) {
+                    // Crear fecha en UTC y ajustar por el offset del servidor
+                    date = new Date(`${datePart}T${timePart}.000Z`);
+                    // Restar el offset del servidor para obtener UTC real
+                    date = new Date(date.getTime() - (serverOffset * 60 * 60 * 1000));
+                } else {
+                    date = new Date(timestamp);
+                }
+            } else {
+                date = new Date(timestamp);
+            }
+            
             const now = new Date();
             const diff = now - date;
+            
+            const optionsTime = { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: true,
+                timeZone: TIMEZONE_CHILE 
+            };
+            
+            const optionsWeekday = { 
+                weekday: 'short',
+                timeZone: TIMEZONE_CHILE 
+            };
+            
+            const optionsDate = { 
+                day: '2-digit', 
+                month: '2-digit',
+                timeZone: TIMEZONE_CHILE 
+            };
 
-            if (diff < 86400000) { // Menos de 24h
-                return date.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+            if (diff < 86400000 && diff > -86400000) { // Menos de 24h
+                return date.toLocaleTimeString('es-CL', optionsTime);
             } else if (diff < 604800000) { // Menos de 1 semana
-                return date.toLocaleDateString('es-CL', { weekday: 'short' });
+                return date.toLocaleDateString('es-CL', optionsWeekday);
             }
-            return date.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit' });
+            return date.toLocaleDateString('es-CL', optionsDate);
         }
 
         function escapeHtml(text) {

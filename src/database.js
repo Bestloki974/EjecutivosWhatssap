@@ -78,7 +78,7 @@ class Database {
     // Obtener usuarios de una empresa (Admin de empresa)
     async getUsersByCompany(companyId) {
         const [rows] = await this.pool.execute(`
-            SELECT id, username, full_name, role, status, created_at
+            SELECT id, company_id, username, full_name, role, status, created_at
             FROM users 
             WHERE company_id = ? AND role = 'executive'
             ORDER BY created_at DESC
@@ -229,17 +229,29 @@ class Database {
     async getOrCreateChat(sessionId, remoteJid, contactName = null) {
         // Extraer el número del JID (sin @c.us, @s.whatsapp.net, @lid, etc.)
         const phoneNumber = remoteJid.split('@')[0];
+        const jidType = remoteJid.split('@')[1]; // 'c.us', 'lid', 's.whatsapp.net'
         
-        // Buscar por número de teléfono (ignorando el sufijo)
+        // PRIMERO: Buscar chat exacto
         let [chats] = await this.pool.execute(
-            `SELECT * FROM chats WHERE session_id = ? AND (
-                remote_jid = ? OR 
-                remote_jid LIKE ? OR
-                remote_jid LIKE ?
-            ) ORDER BY id ASC LIMIT 1`,
-            [sessionId, remoteJid, `${phoneNumber}@%`, `%:${phoneNumber}@%`]
+            'SELECT * FROM chats WHERE session_id = ? AND remote_jid = ? LIMIT 1',
+            [sessionId, remoteJid]
         );
+        
+        // Si no existe exacto, buscar por número similar (diferentes sufijos)
+        if (chats.length === 0) {
+            [chats] = await this.pool.execute(
+                `SELECT * FROM chats WHERE session_id = ? AND (
+                    remote_jid LIKE ? OR
+                    remote_jid LIKE ?
+                ) ORDER BY 
+                    CASE WHEN remote_jid LIKE '%@lid' THEN 0 ELSE 1 END,
+                    id ASC 
+                LIMIT 1`,
+                [sessionId, `${phoneNumber}@%`, `%:${phoneNumber}@%`]
+            );
+        }
 
+        // Si no existe, crear nuevo
         if (chats.length === 0) {
             const [res] = await this.pool.execute(
                 'INSERT INTO chats (session_id, remote_jid, contact_name) VALUES (?, ?, ?)',
@@ -248,9 +260,10 @@ class Database {
             return { id: res.insertId, session_id: sessionId, remote_jid: remoteJid, contact_name: contactName };
         }
         
-        // Si el JID actual es @c.us o @s.whatsapp.net y el guardado es @lid, actualizar al nuevo
+        // PREFERIR @lid: Si el JID actual es @c.us y el guardado es @lid, NO actualizar (mantener @lid)
+        // Solo actualizar si el guardado es @c.us y el nuevo es @lid (actualizar a @lid)
         const savedJid = chats[0].remote_jid;
-        if ((remoteJid.includes('@c.us') || remoteJid.includes('@s.whatsapp.net')) && savedJid.includes('@lid')) {
+        if (remoteJid.includes('@lid') && !savedJid.includes('@lid')) {
             await this.pool.execute(
                 'UPDATE chats SET remote_jid = ? WHERE id = ?',
                 [remoteJid, chats[0].id]

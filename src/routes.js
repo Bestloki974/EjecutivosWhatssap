@@ -771,6 +771,44 @@ router.post('/chats/:chatId/assign', verifyToken, requireRole(['superadmin', 'ad
     }
 });
 
+// Eliminar chat (y sus mensajes)
+router.delete('/chats/:chatId', verifyToken, async (req, res) => {
+    try {
+        const chatId = req.params.chatId;
+
+        // Verificar que el chat existe y obtener info
+        const [chatRows] = await database.pool.execute(`
+            SELECT c.*, ws.company_id, ws.assigned_to as session_assigned_to
+            FROM chats c 
+            JOIN whatsapp_sessions ws ON c.session_id = ws.id 
+            WHERE c.id = ?
+        `, [chatId]);
+
+        if (chatRows.length === 0) {
+            return res.status(404).json({ success: false, error: 'Chat no encontrado' });
+        }
+
+        const chat = chatRows[0];
+
+        // Verificar permisos
+        if (req.user.role === 'executive') {
+            if (chat.session_assigned_to !== req.user.id) {
+                return res.status(403).json({ success: false, error: 'No tienes permiso para eliminar este chat' });
+            }
+        } else if (req.user.role === 'admin' && chat.company_id !== req.user.company_id) {
+            return res.status(403).json({ success: false, error: 'No tienes permiso para eliminar este chat' });
+        }
+
+        // Eliminar mensajes primero (por la FK), luego el chat
+        await database.pool.execute('DELETE FROM messages WHERE chat_id = ?', [chatId]);
+        await database.pool.execute('DELETE FROM chats WHERE id = ?', [chatId]);
+
+        res.json({ success: true, message: 'Chat eliminado exitosamente' });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // ==========================================
 // 📊 RUTAS DE DASHBOARD
 // ==========================================

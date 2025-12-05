@@ -1,4 +1,8 @@
 ﻿// server.js
+
+// Configurar zona horaria de Chile
+process.env.TZ = 'America/Santiago';
+
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');

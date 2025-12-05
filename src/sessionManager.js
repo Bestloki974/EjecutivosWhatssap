@@ -198,6 +198,32 @@ class SessionManager {
             }
         });
 
+        // Evento para actualizar estado de mensajes (leído/entregado)
+        client.on('message_ack', async (msg, ack) => {
+            try {
+                // ack: 0 = ERROR, 1 = ENVIADO, 2 = ENTREGADO, 3 = LEÍDO
+                const ackLabels = ['Error', 'Enviado', 'Entregado', 'Leído'];
+                console.log(`📬 Estado mensaje: ${ackLabels[ack] || ack} - ${msg.id._serialized.substring(0, 30)}...`);
+                
+                // Actualizar en base de datos
+                await database.pool.execute(
+                    'UPDATE messages SET ack = ? WHERE whatsapp_id = ?',
+                    [ack, msg.id._serialized]
+                );
+                
+                // Notificar al frontend por socket
+                const dbSession = await database.getSessionByName(sessionName);
+                if (dbSession && global.io) {
+                    global.io.to(`company_${dbSession.company_id}`).emit('message_ack', {
+                        messageId: msg.id._serialized,
+                        ack: ack
+                    });
+                }
+            } catch (error) {
+                console.error('Error actualizando ack:', error.message);
+            }
+        });
+
         client.on('disconnected', async (reason) => {
             console.log(`❌ Sesión desconectada: ${sessionName}`, reason);
             this.clients.delete(sessionName);
