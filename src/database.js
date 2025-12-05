@@ -360,12 +360,15 @@ class Database {
 
     // Obtener historial de mensajes de un chat
     async getChatMessages(chatId, limit = 100) {
+        // LIMIT no funciona bien como parámetro en prepared statements
+        // Usamos parseInt para asegurar que es un número válido
+        const safeLimit = parseInt(limit) || 100;
         const [rows] = await this.pool.execute(`
             SELECT * FROM messages 
             WHERE chat_id = ?
             ORDER BY timestamp ASC
-            LIMIT ?
-        `, [chatId, limit]);
+            LIMIT ${safeLimit}
+        `, [chatId]);
         return rows;
     }
 
