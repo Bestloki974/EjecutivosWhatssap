@@ -91,9 +91,7 @@ module.exports = {
         database: 'whatsapp_crm',
         waitForConnections: true,
         connectionLimit: 10,
-        queueLimit: 0,
-        timezone: '+00:00', // Usar UTC para consistencia
-        dateStrings: true   // Devolver fechas como strings sin conversión
+        queueLimit: 0
     },
 
     // Configuración de WhatsApp Web

@@ -2295,29 +2295,15 @@
         function formatTime(timestamp) {
             if (!timestamp) return '';
             
-            // Parsear timestamp de MySQL (viene como string: "2025-12-05 11:46:00")
-            // MySQL lo guarda en hora del servidor (EST = UTC-5)
-            // Chile está en UTC-3 (verano), diferencia de +2 horas
-            let date;
+            let date = new Date(timestamp);
             
-            if (typeof timestamp === 'string' && !timestamp.includes('T') && !timestamp.includes('Z')) {
-                // Formato MySQL: "2025-12-05 11:46:00" (sin timezone)
-                // Asumimos que está en hora del servidor (EST = UTC-5)
-                // Agregamos la info de timezone para convertir correctamente
-                const serverOffset = -5; // EST (Eastern Standard Time)
-                const [datePart, timePart] = timestamp.split(' ');
-                
-                if (datePart && timePart) {
-                    // Crear fecha en UTC y ajustar por el offset del servidor
-                    date = new Date(`${datePart}T${timePart}.000Z`);
-                    // Restar el offset del servidor para obtener UTC real
-                    date = new Date(date.getTime() - (serverOffset * 60 * 60 * 1000));
-                } else {
-                    date = new Date(timestamp);
-                }
-            } else {
-                date = new Date(timestamp);
+            // Si la fecha no es válida, intentar parsear formato MySQL
+            if (isNaN(date.getTime()) && typeof timestamp === 'string') {
+                // Formato MySQL: "2025-12-05 11:46:00"
+                date = new Date(timestamp.replace(' ', 'T'));
             }
+            
+            if (isNaN(date.getTime())) return '';
             
             const now = new Date();
             const diff = now - date;
@@ -2340,9 +2326,9 @@
                 timeZone: TIMEZONE_CHILE 
             };
 
-            if (diff < 86400000 && diff > -86400000) { // Menos de 24h
+            if (Math.abs(diff) < 86400000) { // Menos de 24h
                 return date.toLocaleTimeString('es-CL', optionsTime);
-            } else if (diff < 604800000) { // Menos de 1 semana
+            } else if (diff < 604800000 && diff > 0) { // Menos de 1 semana
                 return date.toLocaleDateString('es-CL', optionsWeekday);
             }
             return date.toLocaleDateString('es-CL', optionsDate);
